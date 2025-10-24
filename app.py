@@ -100,6 +100,7 @@ def main():
     
     with tab1:
         st.header("Live Webcam Detection")
+        st.info("📸 **Photo-based Analysis**: This system analyzes individual photos rather than continuous video. Take photos with different facial expressions to see pain detection results.")
         
         col1, col2 = st.columns([2, 1])
         
@@ -147,6 +148,7 @@ def main():
         # Webcam feed using Streamlit's camera input
         if st.session_state.webcam_active and st.session_state.baseline_set:
             st.info("📹 Webcam is active! Take a photo to analyze your facial expression.")
+            st.warning("💡 **Tip**: For best results, keep your camera angle forward-facing (not from the side) and ensure good lighting.")
             
             # Use Streamlit's camera input
             camera_input = st.camera_input("Take a photo for pain detection analysis")
@@ -167,7 +169,7 @@ def main():
                 display_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
                 
                 # Display the processed frame
-                st.image(display_frame, channels="RGB", use_column_width=True, caption="Pain Detection Analysis")
+                st.image(display_frame, channels="RGB", use_container_width=True, caption="Pain Detection Analysis")
                 
                 # Display results
                 col1, col2, col3 = st.columns(3)
@@ -272,7 +274,10 @@ def main():
                 
                 # Calculate averages
                 for key in avg_fas_scores:
-                    avg_fas_scores[key] = np.mean(avg_fas_scores[key])
+                    if avg_fas_scores[key]:  # Check if list is not empty
+                        avg_fas_scores[key] = np.mean([float(x) for x in avg_fas_scores[key] if isinstance(x, (int, float))])
+                    else:
+                        avg_fas_scores[key] = 0.0
                 
                 # Create FACS chart
                 fas_fig = st.session_state.chart_generator.create_facs_breakdown(avg_fas_scores)
@@ -306,6 +311,9 @@ def main():
         
         This is a **demonstration application** for detecting subtle facial microexpressions 
         indicative of pain or discomfort using computer vision and machine learning techniques.
+        
+        **Detection Method**: This application uses photo-based analysis rather than continuous video monitoring. 
+        Each photo is analyzed independently for pain-related facial expressions.
         
         ### Methodology
         

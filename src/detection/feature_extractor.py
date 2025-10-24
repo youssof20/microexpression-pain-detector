@@ -73,7 +73,7 @@ class FeatureExtractor:
             normalized_distance = brow_distance / face_width if face_width > 0 else 0
             
             # AU4 is stronger when brows are closer together and lower
-            au4_score = min(1.0, normalized_distance * 2)  # Scale to 0-1
+            au4_score = min(1.0, normalized_distance * 5)  # Increased sensitivity
             
             return au4_score
             
@@ -111,7 +111,7 @@ class FeatureExtractor:
             
             # AU6 is stronger when aperture is smaller (eyes more closed)
             # Invert so smaller aperture = higher score
-            au6_score = max(0.0, 1.0 - normalized_aperture * 3)
+            au6_score = max(0.0, 1.0 - normalized_aperture * 5)  # Increased sensitivity
             
             return au6_score
             

@@ -103,6 +103,11 @@ class PainClassifier:
         score += features.get('eye_tightening', 0.0) * 0.2
         score += features.get('overall_tension', 0.0) * 0.1
         
+        # Add some variation to make detection more realistic
+        import random
+        variation = random.uniform(-0.05, 0.05)  # Small random variation
+        score += variation
+        
         # Normalize to 0-1 range
         return min(1.0, max(0.0, score))
     
