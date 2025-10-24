@@ -21,7 +21,7 @@ This project implements a **demonstration application** for detecting pain-relat
 
 ### Core Components
 
-- **Face Detection**: MediaPipe for robust facial landmark extraction (468 points)
+- **Face Detection**: OpenCV Haar Cascades for face detection with simplified landmark estimation
 - **Feature Extraction**: FACS-based geometric analysis of facial landmarks
 - **Pain Classification**: Rule-based scoring with optional CNN enhancement
 - **Visualization**: Real-time annotation and interactive Plotly charts
@@ -100,7 +100,7 @@ The system detects pain-related facial expressions using these FACS Action Units
 microexpression_pain_detector/
 ├── src/
 │   ├── detection/
-│   │   ├── face_detector.py          # MediaPipe face & landmark detection
+│   │   ├── face_detector.py          # OpenCV face & landmark detection
 │   │   ├── feature_extractor.py      # FACS-based pain features
 │   │   └── pain_classifier.py        # Rule-based + optional CNN classifier
 │   ├── models/

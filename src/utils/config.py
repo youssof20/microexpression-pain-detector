@@ -18,6 +18,7 @@ class LandmarkIndices:
     
     # Nose landmarks
     NOSE_TIP = 6
+    NOSE_BRIDGE = 6  # Use nose tip as bridge for simplified model
     
     # Mouth landmarks
     MOUTH_TOP = 7
@@ -51,12 +52,12 @@ class ModelConfig:
     FACE_CROP_SIZE = 224
     CONFIDENCE_THRESHOLD = 0.5
     TEMPORAL_SMOOTHING_FACTOR = 0.7
-    MIN_FACE_SIZE = 50  # Minimum face size in pixels
+    MIN_FACE_SIZE = 30  # Minimum face size in pixels (reduced for better detection)
 
 # Streamlit configuration
 class StreamlitConfig:
     PAGE_TITLE = "Microexpression Pain Detector"
-    PAGE_ICON = "😷"
+    PAGE_ICON = "🔬"
     LAYOUT = "wide"
     SIDEBAR_STATE = "expanded"
 

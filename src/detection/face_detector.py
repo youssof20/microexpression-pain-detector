@@ -37,8 +37,8 @@ class FaceDetector:
         # Convert to grayscale for face detection
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
-        # Detect faces
-        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
+        # Detect faces with more sensitive parameters
+        faces = self.face_cascade.detectMultiScale(gray, 1.05, 3, minSize=(30, 30))
         
         if len(faces) > 0:
             # Get the largest face

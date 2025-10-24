@@ -129,13 +129,16 @@ def main():
                     # Detect face and set baseline
                     landmarks = st.session_state.face_detector.detect_face(cv_image)
                     if landmarks is not None:
-                        st.session_state.face_detector.set_baseline(landmarks)
-                        st.session_state.feature_extractor.set_baseline(landmarks)
-                        st.session_state.baseline_set = True
-                        st.success("✅ Baseline set successfully!")
-                        st.rerun()
+                        try:
+                            st.session_state.face_detector.set_baseline(landmarks)
+                            st.session_state.feature_extractor.set_baseline(landmarks)
+                            st.session_state.baseline_set = True
+                            st.success("✅ Baseline set successfully!")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error setting baseline: {str(e)}")
                     else:
-                        st.error("No face detected. Please try again.")
+                        st.error("No face detected. Please try again with better lighting and make sure your face is clearly visible.")
         
         with col2:
             # Current status
@@ -157,7 +160,11 @@ def main():
                 cv_image = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
                 
                 # Process the captured frame
-                annotated_frame, pain_score, category, detailed_scores = st.session_state.video_processor.process_frame(cv_image)
+                try:
+                    annotated_frame, pain_score, category, detailed_scores = st.session_state.video_processor.process_frame(cv_image)
+                except Exception as e:
+                    st.error(f"Error processing frame: {str(e)}")
+                    return
                 
                 # Convert BGR to RGB for display
                 display_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
