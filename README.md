@@ -49,8 +49,8 @@ The system detects pain-related facial expressions using these FACS Action Units
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/youssof20/microexpression-pain-detector.git
-   cd microexpression-pain-detector
+   git clone <repository-url>
+   cd microexpression_pain_detector
    ```
 
 2. **Install dependencies**:
