@@ -49,8 +49,8 @@ The system detects pain-related facial expressions using these FACS Action Units
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
-   cd microexpression_pain_detector
+   git clone https://github.com/youssof20/microexpression-pain-detector.git
+   cd microexpression-pain-detector
    ```
 
 2. **Install dependencies**:
@@ -69,10 +69,15 @@ The system detects pain-related facial expressions using these FACS Action Units
 
 1. **Start the Streamlit app**:
    ```bash
-   streamlit run app.py
+   python -m streamlit run app.py --server.port 8502
+   ```
+   
+   Or use the startup script:
+   ```bash
+   python start_app.py
    ```
 
-2. **Open your browser** to `http://localhost:8501`
+2. **Open your browser** to `http://localhost:8502`
 
 3. **Navigate to "Live Detection" tab**
 
@@ -248,9 +253,9 @@ If you use this project in your research, please cite:
 ```bibtex
 @software{microexpression_pain_detector,
   title={Microexpression-Based Pain Detector},
-  author={Your Name},
+  author={Youssof},
   year={2024},
-  url={https://github.com/your-repo/microexpression_pain_detector}
+  url={https://github.com/youssof20/microexpression-pain-detector}
 }
 ```
 
@@ -258,7 +263,7 @@ If you use this project in your research, please cite:
 
 For questions, suggestions, or collaboration opportunities, please contact:
 
-- **Email**: your.email@university.edu
+- **Email**: contact@example.com
 - **LinkedIn**: [Your LinkedIn Profile](https://linkedin.com/in/yourprofile)
 - **GitHub**: [Your GitHub Profile](https://github.com/yourusername)
 

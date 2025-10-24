@@ -107,24 +107,35 @@ def main():
             # Webcam controls
             if not st.session_state.webcam_active:
                 if st.button("Start Webcam", type="primary"):
-                    if st.session_state.video_processor.start_webcam_processing():
-                        st.session_state.webcam_active = True
-                        st.success("Webcam started!")
-                    else:
-                        st.error("Failed to start webcam. Please check camera permissions.")
+                    st.session_state.webcam_active = True
+                    st.success("Webcam interface activated!")
+                    st.rerun()
             else:
                 if st.button("Stop Webcam"):
-                    st.session_state.video_processor.stop_webcam()
                     st.session_state.webcam_active = False
-                    st.success("Webcam stopped!")
+                    st.success("Webcam interface deactivated!")
+                    st.rerun()
             
             # Baseline setting
             if st.session_state.webcam_active and not st.session_state.baseline_set:
-                if st.button("Set Baseline (Neutral Expression)"):
-                    st.info("Please maintain a neutral expression for 3 seconds...")
-                    time.sleep(3)
-                    st.session_state.baseline_set = True
-                    st.success("Baseline set!")
+                st.info("📸 Take a photo with a neutral expression to set the baseline")
+                baseline_camera = st.camera_input("Set Baseline - Neutral Expression")
+                
+                if baseline_camera is not None:
+                    # Convert to OpenCV format
+                    bytes_data = baseline_camera.getvalue()
+                    cv_image = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+                    
+                    # Detect face and set baseline
+                    landmarks = st.session_state.face_detector.detect_face(cv_image)
+                    if landmarks is not None:
+                        st.session_state.face_detector.set_baseline(landmarks)
+                        st.session_state.feature_extractor.set_baseline(landmarks)
+                        st.session_state.baseline_set = True
+                        st.success("✅ Baseline set successfully!")
+                        st.rerun()
+                    else:
+                        st.error("No face detected. Please try again.")
         
         with col2:
             # Current status
@@ -133,38 +144,49 @@ def main():
             else:
                 st.metric("Status", "Inactive", delta="Stopped")
         
-        # Webcam feed
-        if st.session_state.webcam_active:
-            # Create placeholder for video
-            video_placeholder = st.empty()
+        # Webcam feed using Streamlit's camera input
+        if st.session_state.webcam_active and st.session_state.baseline_set:
+            st.info("📹 Webcam is active! Take a photo to analyze your facial expression.")
             
-            # Process webcam frames
-            while st.session_state.webcam_active:
-                result = st.session_state.video_processor.process_webcam_frame()
+            # Use Streamlit's camera input
+            camera_input = st.camera_input("Take a photo for pain detection analysis")
+            
+            if camera_input is not None:
+                # Convert uploaded image to OpenCV format
+                bytes_data = camera_input.getvalue()
+                cv_image = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
                 
-                if result is not None:
-                    annotated_frame, pain_score, category, detailed_scores = result
+                # Process the captured frame
+                annotated_frame, pain_score, category, detailed_scores = st.session_state.video_processor.process_frame(cv_image)
+                
+                # Convert BGR to RGB for display
+                display_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
+                
+                # Display the processed frame
+                st.image(display_frame, channels="RGB", use_column_width=True, caption="Pain Detection Analysis")
+                
+                # Display results
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Pain Score", f"{pain_score:.2f}")
+                with col2:
+                    st.metric("Category", category)
+                with col3:
+                    st.metric("Analysis", "Complete")
+                
+                # Display detailed FACS scores
+                if detailed_scores:
+                    st.subheader("FACS Action Unit Breakdown")
+                    fas_data = []
+                    for au_name, score in detailed_scores.items():
+                        if au_name in ['au4', 'au6', 'au7', 'au9', 'au10', 'eye_tightening']:
+                            fas_data.append({"Action Unit": au_name.upper(), "Intensity": f"{score:.2f}"})
                     
-                    # Convert BGR to RGB for display
-                    display_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-                    
-                    # Display frame
-                    video_placeholder.image(display_frame, channels="RGB", use_column_width=True)
-                    
-                    # Display current pain info
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Pain Score", f"{pain_score:.2f}")
-                    with col2:
-                        st.metric("Category", category)
-                    with col3:
-                        st.metric("FPS", "~15", delta="Real-time")
-                    
-                    # Small delay to prevent overwhelming the system
-                    time.sleep(0.067)  # ~15 FPS
-                else:
-                    st.warning("No frame received from webcam")
-                    break
+                    if fas_data:
+                        st.table(fas_data)
+                
+                # Add to session tracker
+                st.session_state.session_tracker.add_data_point(pain_score, category, detailed_scores)
     
     with tab2:
         st.header("Video File Analysis")

@@ -196,13 +196,12 @@ class FeatureExtractor:
             AU10 intensity (0.0-1.0)
         """
         try:
-            # Get mouth landmarks
-            upper_lip_top = landmarks[LandmarkIndices.UPPER_LIP_TOP]
-            upper_lip_bottom = landmarks[LandmarkIndices.UPPER_LIP_BOTTOM]
+            # Get mouth landmarks (simplified)
             mouth_top = landmarks[LandmarkIndices.MOUTH_TOP]
+            mouth_bottom = landmarks[LandmarkIndices.MOUTH_BOTTOM]
             
-            # Calculate upper lip height
-            lip_height = abs(upper_lip_top[1] - upper_lip_bottom[1])
+            # Calculate mouth height
+            mouth_height = abs(mouth_top[1] - mouth_bottom[1])
             
             # Calculate distance from mouth to nose
             nose_tip = landmarks[LandmarkIndices.NOSE_TIP]
@@ -210,7 +209,7 @@ class FeatureExtractor:
             
             # Normalize
             face_height = self._get_face_height(landmarks)
-            normalized_height = lip_height / face_height if face_height > 0 else 0
+            normalized_height = mouth_height / face_height if face_height > 0 else 0
             normalized_distance = mouth_nose_distance / face_height if face_height > 0 else 0
             
             # AU10 is stronger when upper lip is raised (smaller mouth-nose distance)
@@ -284,22 +283,21 @@ class FeatureExtractor:
             Mouth tension score (0.0-1.0)
         """
         try:
-            # Get mouth landmarks
+            # Get mouth landmarks (simplified)
             mouth_top = landmarks[LandmarkIndices.MOUTH_TOP]
             mouth_bottom = landmarks[LandmarkIndices.MOUTH_BOTTOM]
-            mouth_left = landmarks[LandmarkIndices.MOUTH_LEFT]
-            mouth_right = landmarks[LandmarkIndices.MOUTH_RIGHT]
             
             # Calculate mouth dimensions
             mouth_height = abs(mouth_top[1] - mouth_bottom[1])
-            mouth_width = abs(mouth_right[0] - mouth_left[0])
+            
+            # Estimate mouth width from face proportions
+            face_width = self._get_face_width(landmarks)
+            estimated_mouth_width = face_width * 0.4  # Rough estimate
             
             # Normalize
             face_height = self._get_face_height(landmarks)
-            face_width = self._get_face_width(landmarks)
-            
             normalized_height = mouth_height / face_height if face_height > 0 else 0
-            normalized_width = mouth_width / face_width if face_width > 0 else 0
+            normalized_width = estimated_mouth_width / face_width if face_width > 0 else 0
             
             # Mouth tension can be detected by changes in mouth shape
             tension_score = min(1.0, (normalized_height + normalized_width) * 0.5)

@@ -3,42 +3,25 @@ Configuration constants for the Pain Detector project.
 Centralizes all magic numbers and settings.
 """
 
-# MediaPipe Face Mesh landmark indices for FACS Action Units
-# Based on MediaPipe's 468-point face mesh model
+# Simplified landmark indices for FACS Action Units
+# Based on 9-point simplified face model
 class LandmarkIndices:
     # Brow landmarks
-    LEFT_INNER_BROW = 21
-    RIGHT_INNER_BROW = 22
-    LEFT_OUTER_BROW = 17
-    RIGHT_OUTER_BROW = 26
+    LEFT_INNER_BROW = 0
+    RIGHT_INNER_BROW = 1
     
     # Eye landmarks
-    LEFT_EYE_TOP = 159
-    LEFT_EYE_BOTTOM = 145
-    LEFT_EYE_INNER = 133
-    LEFT_EYE_OUTER = 33
-    RIGHT_EYE_TOP = 386
-    RIGHT_EYE_BOTTOM = 374
-    RIGHT_EYE_INNER = 362
-    RIGHT_EYE_OUTER = 263
+    LEFT_EYE_TOP = 2
+    LEFT_EYE_BOTTOM = 3
+    RIGHT_EYE_TOP = 4
+    RIGHT_EYE_BOTTOM = 5
     
     # Nose landmarks
-    NOSE_TIP = 1
-    NOSE_BRIDGE = 6
+    NOSE_TIP = 6
     
     # Mouth landmarks
-    MOUTH_TOP = 13
-    MOUTH_BOTTOM = 14
-    MOUTH_LEFT = 61
-    MOUTH_RIGHT = 291
-    UPPER_LIP_TOP = 12
-    UPPER_LIP_BOTTOM = 15
-    
-    # Face boundary landmarks for normalization
-    FACE_LEFT = 172
-    FACE_RIGHT = 397
-    FACE_TOP = 10
-    FACE_BOTTOM = 152
+    MOUTH_TOP = 7
+    MOUTH_BOTTOM = 8
 
 # Pain score thresholds
 class PainThresholds:

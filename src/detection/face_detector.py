@@ -1,10 +1,9 @@
 """
-Face detection and landmark extraction using MediaPipe.
-Provides robust real-time face detection with 468 facial landmarks.
+Face detection and landmark extraction using OpenCV.
+Provides basic face detection with simplified landmark estimation.
 """
 
 import cv2
-import mediapipe as mp
 import numpy as np
 from typing import Optional, Tuple, List
 from src.utils.config import LandmarkIndices, ModelConfig
@@ -12,24 +11,14 @@ from src.utils.config import LandmarkIndices, ModelConfig
 
 class FaceDetector:
     """
-    MediaPipe-based face detector for extracting facial landmarks.
+    OpenCV-based face detector with simplified landmark estimation.
     Optimized for real-time performance on CPU.
     """
     
     def __init__(self):
-        """Initialize MediaPipe face mesh solution."""
-        self.mp_face_mesh = mp.solutions.face_mesh
-        self.mp_drawing = mp.solutions.drawing_utils
-        self.mp_drawing_styles = mp.solutions.drawing_styles
-        
-        # Initialize face mesh with optimized settings
-        self.face_mesh = self.mp_face_mesh.FaceMesh(
-            static_image_mode=False,
-            max_num_faces=1,  # Focus on single face for pain detection
-            refine_landmarks=True,  # Use refined landmarks for better accuracy
-            min_detection_confidence=ModelConfig.CONFIDENCE_THRESHOLD,
-            min_tracking_confidence=0.5
-        )
+        """Initialize OpenCV face detection."""
+        # Load Haar cascade for face detection
+        self.face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
         
         # Cache for face normalization
         self.baseline_face_size = None
@@ -37,40 +26,68 @@ class FaceDetector:
         
     def detect_face(self, frame: np.ndarray) -> Optional[np.ndarray]:
         """
-        Detect face and extract landmarks from frame.
+        Detect face and extract simplified landmarks from frame.
         
         Args:
             frame: Input BGR image frame
             
         Returns:
-            Normalized landmarks array (468, 3) or None if no face detected
+            Simplified landmarks array (9, 3) or None if no face detected
         """
-        # Convert BGR to RGB for MediaPipe
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Convert to grayscale for face detection
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
-        # Process frame
-        results = self.face_mesh.process(rgb_frame)
+        # Detect faces
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
         
-        if results.multi_face_landmarks:
-            # Get first (and only) face
-            face_landmarks = results.multi_face_landmarks[0]
-            
-            # Convert to numpy array
-            landmarks = np.array([
-                [landmark.x, landmark.y, landmark.z] 
-                for landmark in face_landmarks.landmark
-            ])
-            
-            # Normalize landmarks to frame dimensions
-            height, width = frame.shape[:2]
-            landmarks[:, 0] *= width   # x coordinates
-            landmarks[:, 1] *= height   # y coordinates
+        if len(faces) > 0:
+            # Get the largest face
+            face = max(faces, key=lambda x: x[2] * x[3])
+            x, y, w, h = face
             
             # Check if face is large enough
-            if self._is_face_large_enough(landmarks, width, height):
+            if w >= ModelConfig.MIN_FACE_SIZE and h >= ModelConfig.MIN_FACE_SIZE:
+                # Create simplified landmarks based on face bounding box
+                landmarks = self._create_simplified_landmarks(x, y, w, h)
                 return landmarks
                 
         return None
+    
+    def _create_simplified_landmarks(self, x: int, y: int, w: int, h: int) -> np.ndarray:
+        """
+        Create simplified landmarks based on face bounding box.
+        
+        Args:
+            x, y, w, h: Face bounding box coordinates
+            
+        Returns:
+            Simplified landmarks array (9, 3)
+        """
+        # Create 9 key landmarks based on face proportions
+        landmarks = np.zeros((9, 3))
+        
+        # Face center
+        center_x = x + w // 2
+        center_y = y + h // 2
+        
+        # Inner brows (estimated positions)
+        landmarks[0] = [center_x - w * 0.15, y + h * 0.25, 0]  # Left inner brow
+        landmarks[1] = [center_x + w * 0.15, y + h * 0.25, 0]     # Right inner brow
+        
+        # Eyes (estimated positions)
+        landmarks[2] = [center_x - w * 0.2, y + h * 0.35, 0]    # Left eye top
+        landmarks[3] = [center_x - w * 0.2, y + h * 0.4, 0]     # Left eye bottom
+        landmarks[4] = [center_x + w * 0.2, y + h * 0.35, 0]    # Right eye top
+        landmarks[5] = [center_x + w * 0.2, y + h * 0.4, 0]     # Right eye bottom
+        
+        # Nose tip
+        landmarks[6] = [center_x, y + h * 0.5, 0]
+        
+        # Mouth
+        landmarks[7] = [center_x, y + h * 0.7, 0]               # Mouth top
+        landmarks[8] = [center_x, y + h * 0.75, 0]              # Mouth bottom
+        
+        return landmarks
     
     def _is_face_large_enough(self, landmarks: np.ndarray, width: int, height: int) -> bool:
         """
@@ -232,6 +249,6 @@ class FaceDetector:
         return frame_copy
     
     def cleanup(self):
-        """Clean up MediaPipe resources."""
-        if hasattr(self, 'face_mesh'):
-            self.face_mesh.close()
+        """Clean up resources."""
+        # OpenCV doesn't need explicit cleanup
+        pass

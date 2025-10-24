@@ -5,7 +5,7 @@ Manages video capture, frame processing, and video file analysis.
 
 import cv2
 import numpy as np
-from typing import Optional, Generator, Tuple
+from typing import Optional, Generator, Tuple, Dict
 import os
 from pathlib import Path
 

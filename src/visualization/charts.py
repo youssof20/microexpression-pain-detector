@@ -107,11 +107,26 @@ class PainChartGenerator:
             number={'font': {'size': 50}}
         ), row=1, col=2)
         
-        # Score distribution histogram (placeholder)
-        fig.add_trace(go.Histogram(
-            x=[0.1, 0.2, 0.3, 0.4, 0.5],  # Placeholder data
-            name="Score Distribution"
-        ), row=2, col=1)
+        # Score distribution histogram
+        if session_data.get('total_frames', 0) > 0:
+            # Create histogram from actual session data
+            scores = session_data.get('pain_scores', [])
+            if scores:
+                fig.add_trace(go.Histogram(
+                    x=scores,
+                    name="Score Distribution",
+                    nbinsx=10
+                ), row=2, col=1)
+            else:
+                fig.add_trace(go.Histogram(
+                    x=[0],  # Empty histogram
+                    name="Score Distribution"
+                ), row=2, col=1)
+        else:
+            fig.add_trace(go.Histogram(
+                x=[0],  # Empty histogram
+                name="Score Distribution"
+            ), row=2, col=1)
         
         # Session stats table
         stats_data = [
