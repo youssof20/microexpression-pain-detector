@@ -317,16 +317,22 @@ class FeatureExtractor:
         Returns:
             Overall tension score (0.0-1.0)
         """
-        # Combine all features for overall tension
-        features = self.extract_all_features(landmarks)
+        # Extract individual features directly to avoid recursion
+        au4 = self._extract_au4_brow_lowerer(landmarks)
+        au6 = self._extract_au6_orbital_tightening(landmarks)
+        au7 = self._extract_au7_lid_tightener(landmarks)
+        au9 = self._extract_au9_nose_wrinkler(landmarks)
+        au10 = self._extract_au10_upper_lip_raiser(landmarks)
+        eye_tightening = (au6 * 0.4 + au7 * 0.3 + self._extract_au43_eye_closure(landmarks) * 0.3)
+        mouth_tension = self._extract_mouth_tension(landmarks)
         
         # Weighted combination of key pain indicators
         tension_score = (
-            features['au4'] * 0.25 +
-            features['eye_tightening'] * 0.35 +
-            features['au9'] * 0.15 +
-            features['au10'] * 0.15 +
-            features['mouth_tension'] * 0.10
+            au4 * 0.25 +
+            eye_tightening * 0.35 +
+            au9 * 0.15 +
+            au10 * 0.15 +
+            mouth_tension * 0.10
         )
         
         return min(1.0, tension_score)

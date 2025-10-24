@@ -109,12 +109,10 @@ def main():
                 if st.button("Start Webcam", type="primary"):
                     st.session_state.webcam_active = True
                     st.success("Webcam interface activated!")
-                    st.rerun()
             else:
                 if st.button("Stop Webcam"):
                     st.session_state.webcam_active = False
                     st.success("Webcam interface deactivated!")
-                    st.rerun()
             
             # Baseline setting
             if st.session_state.webcam_active and not st.session_state.baseline_set:
@@ -134,7 +132,6 @@ def main():
                             st.session_state.feature_extractor.set_baseline(landmarks)
                             st.session_state.baseline_set = True
                             st.success("✅ Baseline set successfully!")
-                            st.rerun()
                         except Exception as e:
                             st.error(f"Error setting baseline: {str(e)}")
                     else:
