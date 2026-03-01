@@ -10,7 +10,39 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import pandas as pd
 from typing import Dict, List, Optional, Tuple
-from src.utils.config import Colors, LandmarkIndices
+from src.utils.config import Colors, MediaPipeIndices
+
+
+def draw_overlay(frame: np.ndarray, landmarks: np.ndarray, score_100: float,
+                 category: str, show_landmarks: bool = True) -> np.ndarray:
+    """
+    Draw landmarks and pain score/category on frame.
+    Score 0-100; zones: 0-30 neutral, 30-60 mild, 60-100 high.
+    """
+    out = frame.copy()
+    if score_100 < 30:
+        color = Colors.GREEN
+    elif score_100 < 60:
+        color = Colors.YELLOW
+    else:
+        color = Colors.RED
+    cv2.putText(out, f"Pain: {score_100:.0f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+    cv2.putText(out, category, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+    if show_landmarks and landmarks is not None:
+        key_indices = [
+            MediaPipeIndices.LEFT_BROW_INNER, MediaPipeIndices.RIGHT_BROW_INNER,
+            MediaPipeIndices.LEFT_EYE_TOP, MediaPipeIndices.LEFT_EYE_BOTTOM,
+            MediaPipeIndices.RIGHT_EYE_TOP, MediaPipeIndices.RIGHT_EYE_BOTTOM,
+            MediaPipeIndices.NOSE_TIP, MediaPipeIndices.NOSE_ROOT,
+            MediaPipeIndices.MOUTH_LEFT, MediaPipeIndices.MOUTH_RIGHT,
+            MediaPipeIndices.LEFT_CHEEK, MediaPipeIndices.RIGHT_CHEEK,
+        ]
+        for idx in key_indices:
+            if idx < landmarks.shape[0]:
+                x, y = int(landmarks[idx, 0]), int(landmarks[idx, 1])
+                if 0 <= x < out.shape[1] and 0 <= y < out.shape[0]:
+                    cv2.circle(out, (x, y), 3, (0, 255, 0), -1)
+    return out
 
 
 class PainAnnotator:
@@ -74,22 +106,22 @@ class PainAnnotator:
         Returns:
             Frame with landmarks drawn
         """
-        # Draw key landmarks for pain detection
+        # Draw key landmarks for pain detection (MediaPipe indices)
         key_indices = [
-            LandmarkIndices.LEFT_INNER_BROW,
-            LandmarkIndices.RIGHT_INNER_BROW,
-            LandmarkIndices.LEFT_EYE_TOP,
-            LandmarkIndices.LEFT_EYE_BOTTOM,
-            LandmarkIndices.RIGHT_EYE_TOP,
-            LandmarkIndices.RIGHT_EYE_BOTTOM,
-            LandmarkIndices.NOSE_TIP,
-            LandmarkIndices.MOUTH_TOP,
-            LandmarkIndices.MOUTH_BOTTOM
+            MediaPipeIndices.LEFT_BROW_INNER,
+            MediaPipeIndices.RIGHT_BROW_INNER,
+            MediaPipeIndices.LEFT_EYE_TOP,
+            MediaPipeIndices.LEFT_EYE_BOTTOM,
+            MediaPipeIndices.RIGHT_EYE_TOP,
+            MediaPipeIndices.RIGHT_EYE_BOTTOM,
+            MediaPipeIndices.NOSE_TIP,
+            MediaPipeIndices.MOUTH_LEFT,
+            MediaPipeIndices.MOUTH_RIGHT,
         ]
         
         for idx in key_indices:
-            if idx < len(landmarks):
-                x, y = int(landmarks[idx][0]), int(landmarks[idx][1])
+            if idx < landmarks.shape[0]:
+                x, y = int(landmarks[idx, 0]), int(landmarks[idx, 1])
                 cv2.circle(frame, (x, y), 3, Colors.BLUE, -1)
         
         return frame
@@ -117,8 +149,8 @@ class PainAnnotator:
         
         # Highlight eyebrow region
         try:
-            left_brow = landmarks[LandmarkIndices.LEFT_INNER_BROW]
-            right_brow = landmarks[LandmarkIndices.RIGHT_INNER_BROW]
+            left_brow = landmarks[MediaPipeIndices.LEFT_BROW_INNER]
+            right_brow = landmarks[MediaPipeIndices.RIGHT_BROW_INNER]
             
             brow_center_x = int((left_brow[0] + right_brow[0]) / 2)
             brow_center_y = int((left_brow[1] + right_brow[1]) / 2)
@@ -130,10 +162,10 @@ class PainAnnotator:
         
         # Highlight eye region
         try:
-            left_eye_top = landmarks[LandmarkIndices.LEFT_EYE_TOP]
-            left_eye_bottom = landmarks[LandmarkIndices.LEFT_EYE_BOTTOM]
-            right_eye_top = landmarks[LandmarkIndices.RIGHT_EYE_TOP]
-            right_eye_bottom = landmarks[LandmarkIndices.RIGHT_EYE_BOTTOM]
+            left_eye_top = landmarks[MediaPipeIndices.LEFT_EYE_TOP]
+            left_eye_bottom = landmarks[MediaPipeIndices.LEFT_EYE_BOTTOM]
+            right_eye_top = landmarks[MediaPipeIndices.RIGHT_EYE_TOP]
+            right_eye_bottom = landmarks[MediaPipeIndices.RIGHT_EYE_BOTTOM]
             
             # Left eye
             left_eye_center_x = int(left_eye_top[0])
