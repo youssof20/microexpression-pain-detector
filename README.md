@@ -2,6 +2,8 @@
 
 A webcam app that tries to detect pain from facial expressions using computer vision.
 
+<img width="1195" height="881" alt="image" src="https://github.com/user-attachments/assets/7061ef18-c632-4c99-bfe1-448822313840" />
+
 ## What it does
 
 Uses your webcam to analyze facial movements and estimate if someone might be experiencing pain. Based on the Facial Action Coding System (FACS) - basically looking for specific facial muscle movements like brow furrowing, eye squinting, etc.
