@@ -45,6 +45,12 @@ def set_collecting_baseline(value: bool) -> None:
             _state["baseline_buffer"] = []
 
 
+def set_baseline_set(value: bool) -> None:
+    """Mark baseline as set (e.g. after setting from sample video)."""
+    with _lock:
+        _state["baseline_set"] = value
+
+
 def process_frame(frame: np.ndarray, face_detector: FaceDetector,
                   feature_extractor: FeatureExtractor,
                   pain_classifier: PainClassifier) -> Tuple[np.ndarray, float, str, Dict]:
